@@ -64,14 +64,16 @@ We train and validate the random forest and boosting classifiers and test their 
 
 \section{Introduction}
 
-In this miniproject we are going to consider a classification problem in statistical machine learning.
-The goal is to use different 
+In this miniproject we implement, validate and benchmark two classification methods used in statistical machine learning.
+We consider a training dataset of 400 songs that can be classified into two categories based on 13 features (Figure \ref{fig:pairs}).
+After training the classifiers on the training dataset, we evaluate their performance on a test dataset consisting of 100 songs.
+The prediction of the test data is evaluated using a web-based platform, which returns the percentage of successfully classified songs.
 
 \begin{figure}[htp!]
   \centering
   \includegraphics[height=0.5\textwidth] {figs/song_pairs.png}
   \caption{The trainig data set consists of 400 songs that are classified in 2 categories, ``liked'' (red dors) and ``disliked'' (green dots), based on 13 features.}
-  \label{fig:figure2}
+  \label{fig:pairs}
 \end{figure}
 
 \section{Used methods}
@@ -144,20 +146,37 @@ Figure \ref{fig:mfinal_parameter_values} shows how ensemble error changes while 
 As explained, we use $4-$fold cross-validation to get the confusion matrix for the data set. Result is given in Table \ref{tab:confussion_matrix}. Prediction error in this case is below $0.20$, so we can conclude that the model is independent of our training$/$test data set definition, since the results are consistent.
 
 \begin {table}[h]
-\caption {$4-$fold confussion matrix. $0-$Andres did not like the song; $1-$Andreas liked the song.} \label{tab:confussion_matrix} 
 \begin{center}
 \begin{tabular}{r|r|r}
-\hline
   Observed & 0  & 1 \\
   \hline			
   Predicted 0 & 107 & 32 \\
   1 & 46 & 215 \\ 
-  \hline
 \end{tabular}
 \end{center}
+\caption {$4-$fold confussion matrix. $0-$Andres did not like the song; $1-$Andreas liked the song.} 
+\label{tab:confussion_matrix} 
 \end {table}
 
-\subsection{Naive Classifier}
+\section{Results}
+
+The performance obtained on the training dataset is shown in Table \ref{tab:performance}.
+The naive classifier classifies all points of the test dataset as ``like''.
+
+\begin {table}[h]
+\begin{center}
+\begin{tabular}{r|r}
+  Method & Performance   \\
+  \hline			
+  Boosting & 84 \% \\
+  Random Forest & 80 \% \\
+  LDA & 77 \% \\
+  Naive & 60 \%
+\end{tabular}
+\end{center}
+\caption {Performance of our classifiers on the test dataset.} 
+\label{tab:performance} 
+\end {table}
 
 \section{Conclusion}
 
