@@ -64,9 +64,9 @@ We train and validate the random forest and boosting classifiers and test their 
 
 \section{Introduction}
 
-In this miniproject we implement, validate and benchmark two classification methods used in statistical machine learning.
+In this miniproject we implement, validate, and benchmark two classification methods used in statistical machine learning; random forests and boosting.
 We consider a training dataset of 400 songs that can be classified into two categories based on 13 features (Figure \ref{fig:pairs}).
-After training the classifiers on the training dataset, we evaluate their performance on a test dataset consisting of 100 songs.
+After training the classifiers on the dataset, we evaluate their performance on a test dataset consisting of 100 songs.
 The prediction of the test data is evaluated using a web-based platform, which returns the percentage of successfully classified songs.
 
 \begin{figure}[htp!]
@@ -79,6 +79,25 @@ The prediction of the test data is evaluated using a web-based platform, which r
 \section{Used methods}
 
 \subsection{Random Forest}
+
+Random Forest belongs to the family of tree-based methods, which rely on the training and evaluation of decision trees.
+Decision trees are built by segmenting the predictor space into a number of regions, typically using a technique called \textit{recursive binary splitting}.
+For classification, each region of the tree is assigned to a predictor class.
+Whatever point that falls into the region is straightforwardly assigned to the class.
+
+\textit{Bagging} makes use of a statistical technique called Bootstrap. 
+Bootstrapping is a test that allows to estimate sample metrics such as bias and variance using random sampling with replacement.
+Typically, decision trees suffer from high variance, depending on which part of the training data they have been built [1].
+The idea of bagging is than to sample the training data with replacement, and creating $B$ bootstrapped sets $\hat{f}^{*b}$. 
+The bagged predictor is than computed by the average of the bootstrapped sets,
+
+\begin{equation} \label{boost_error_rate}
+\hat{f}_{bag}(x)=\frac{1}{B}\sum_{b=1}^{B}\hat{f}^{*b}(x),
+\end{equation}
+
+and has a provably lower variance than an individual decision tree [1].
+
+\textit{Random Forests} further decorrelates the ensemble of bagged trees by considering only a random subset of predictors instead of the complete set. As a rule of thumb, the method takes $m \sim  \sqrt{p}$ predictors at each split, where $p$ is the total amount of predictors. This increases the variance of trees as, for example, strong predictors that otherwise would be correlated in all of the trees, are now left out. 
 
 \subsection{Boosting}
 
@@ -102,6 +121,10 @@ G(x)=sign(\sum_{m=1}^{M}\alpha_m G_m(x)).
 \section{Implementation and Validation}
 
 \subsection{Random Forest}
+
+For the random forest classification we used the R-package {\fontfamily{cmtt}\selectfont ranfomForest}.
+
+We carried out k-fold cross-validation for feature selection using the {\fontfamily{cmtt}\selectfont rfcv} command, which makes use of the algorithm described by [4]. As the method relies on a random seed which determines how trees are generates, we repeated the cross-validation $N=10$ times and created a mean predictor.
 
 \subsection{Boosting}
 
@@ -184,6 +207,10 @@ The naive classifier classifies all points of the test dataset as ``like''.
 
 So far anonymized.
 
+%Petar implemented and validated the Boosting Method.
+%Pavol implemented and validated the Random Forest Method.
+%The report was written jointly by both authors.
+
 \section*{References}
 
 \small
@@ -194,5 +221,7 @@ So far anonymized.
 with Applications in R}, Springer, New York.
 
 [3] Alfaro, E., Gamez, M. \ \$ Garcia, N., with contributions from Li, G. \ (2015) {\it Multiclass AdaBoost.M1, SAMME and Bagging Version 4.1}
+
+[4] Svetnik, V., Liaw, A., Tong, C. \ \& Wang, T., \ (2014) {\it Application of Breiman’s Random Forest to Modeling  Structure-Activity  Relationships  of  Pharmaceutical  Molecules}
 
 \end{document}
