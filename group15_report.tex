@@ -21,6 +21,7 @@
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 \usepackage{graphicx,color}
+\usepackage{listings}
 
 \newcommand{\todo}[1]{\textcolor{blue}{#1}}
 
@@ -72,18 +73,18 @@ The prediction of the test data is evaluated using a web-based platform, which r
 \begin{figure}[htp!]
   \centering
   \includegraphics[height=0.5\textwidth] {figs/song_pairs.png}
-  \caption{The trainig data set consists of 400 songs that are classified in 2 categories, ``liked'' (red dors) and ``disliked'' (green dots), based on 13 features.}
+  \caption{The trainig data set consists of 400 songs that are classified in 2 categories, ``liked'' (red dots) and ``disliked'' (green dots), based on 13 features.}
   \label{fig:pairs}
 \end{figure}
 
-\section{Used methods}
+\section{Methods}
 
 \subsection{Random Forest}
 
 Random Forest belongs to the family of tree-based methods, which rely on the training and evaluation of decision trees.
 Decision trees are built by segmenting the predictor space into a number of regions, typically using a technique called \textit{recursive binary splitting}.
 For classification, each region of the tree is assigned to a predictor class.
-Whatever point that falls into the region is straightforwardly assigned to the class.
+A point that falls into the region is straightforwardly classified as belonging to the class.
 
 \textit{Bagging} makes use of a statistical technique called Bootstrap. 
 Bootstrapping is a test that allows to estimate sample metrics such as bias and variance using random sampling with replacement.
@@ -97,11 +98,11 @@ The bagged predictor is than computed by the average of the bootstrapped sets,
 
 and has a provably lower variance than an individual decision tree [1].
 
-\textit{Random Forests} further decorrelates the ensemble of bagged trees by considering only a random subset of predictors instead of the complete set. As a rule of thumb, the method takes $m \sim  \sqrt{p}$ predictors at each split, where $p$ is the total amount of predictors. This increases the variance of trees as, for example, strong predictors that otherwise would be correlated in all of the trees, are now left out. 
+\textit{Random Forests} further decorrelate the ensemble of bagged trees by considering only a random subset of predictors instead of the complete set. As a rule of thumb, the method takes $m \sim  \sqrt{p}$ predictors at each split, where $p$ is the total amount of predictors. This increases the variance of trees as, for example, strong predictors that otherwise would be correlated in all of the trees, are now left out. 
 
 \subsection{Boosting}
 
-Boosting is one more technique that can be used for improving the predictions resulting from a decision tree. Originally it was designed for improving classification methods, but soon it was realized that it can be applied to many statistical learning methods, both for classification and regression problems. It is considered to be one of the most successful machine learning ideas.
+Boosting [1,2] is one more technique that can be used for improving the predictions resulting from a decision tree. Originally it was designed for improving classification methods, but soon it was realized that it can be applied to many statistical learning methods, both for classification and regression problems. It is considered to be one of the most successful machine learning ideas.
 
 Weak models, those models that perform only slightly better compared to random guessing, are built sequentially. In this series of week models, each one tries to correct the mistakes made by the previous one. Eventually, they are all combined into final, much stronger, model. 
 
@@ -140,7 +141,7 @@ classification) or mean squared error (in regression) at each step of halving.
 
 \subsection{Boosting}
 
-For the classification problem discussed in this report we also applied boosting classification tree method. AdaBoost is available in R as the command {\fontfamily{cmtt}\selectfont boosting} in the {\fontfamily{cmtt}\selectfont adabag} package.
+For the classification problem discussed in this report we also applied boosting classification tree method. AdaBoost is available in R as the command {\fontfamily{cmtt}\selectfont boosting} in the {\fontfamily{cmtt}\selectfont adabag} package [3].
 
 There are several parameters that need to be optimized. The parameter {\fontfamily{cmtt}\selectfont mfinal} represents the number of trees (weak classifiers) that is used to build the final model. Boosting can overfit if the value of this parameter is too large. Default value is $100$. The parameter {\fontfamily{cmtt}\selectfont maxdepth} sets the maximum depth of any node of the final tree. The root node is counted as $0$. If not specified it will be set equal to the number of classes. The {\fontfamily{cmtt}\selectfont minsplit} value defines the minimal number of observations (data points) that each node needs to have in order for a further split to be attempted. The complexity parameter {\fontfamily{cmtt}\selectfont cp} tells us how much the overall performance of a fit has to be improved by a given split in order for it to happen. All these parameters were optimized while constructing the model. Parameters {\fontfamily{cmtt}\selectfont maxdepth}, {\fontfamily{cmtt}\selectfont minsplit} and {\fontfamily{cmtt}\selectfont cp} were implemented through {\fontfamily{cmtt}\selectfont control} option of a {\fontfamily{cmtt}\selectfont boosting} command.
 
@@ -150,25 +151,29 @@ We use $K-$fold cross-validation to get the confusion matrix for the data set. S
 
 \subsection{Random Forest}
 
-As the method relies on a random seed which determines how trees are generates, we repeated the cross-validation $N=10$ times and created a mean predictor.
-As shown in Figure~\ref{fig:numpredictors}, if more than 5 predictors ar taken the test-error lies within the same interval.
-However, the mean value is lowest for the case where all the predictor values are consideres.
+We first computed the cross-validation for variable selection, that is described in the previous section.
+As the method relies on a random seed which determines how trees are generated, we repeated the cross-validation $N=10$ times and computed a mean and standard deviation of the test error.
+As shown in Figure~\ref{fig:numpredictors}, for more than 5 predictors the test-error lies within a similar margin.
+However, the mean value is lowest for the case where all the predictor values are considered.
 
 \begin{figure}[htp!]
   \centering
   \includegraphics[height=0.5\textwidth] {figs/numpredictors.png}
-  \caption{Varying the number of predictors.}
+  \caption{Varying the number of predictors considered (N=10).}
   \label{fig:numpredictors}
 \end{figure}
 
 Likewise, we evaluated the impact of the tree size on the test error, which is depicted in Figure~\ref{fig:treesize}.
-Here we varied the test and the training data with a ratio of $0.75$ and resampled $N=40$ times.
-We found that as long as the size of trees is larger than 30, the test erorr lies within the same margin.
+Here we have splitted the data into a training and validation part, with a ratio of $0.75:0.25$, and re-sampled the dataset $N=40$ times for a different choice of bootstraps $B$.
+We found that as long as $B$ is larger than 30, the test error lies within the same margin.
+Note, that the test error is strongly varying depending on the split of the dataset, with a standard deviation of more than $5\%$.
+
+This result motivated us to use all predictors and a large choice of $B$ for classification of the test data.
 
 \begin{figure}[htp!]
   \centering
   \includegraphics[height=0.5\textwidth] {figs/treesize.png}
-  \caption{Varying the size of the tree.}
+  \caption{Varying the number of generated trees (N=40).}
   \label{fig:treesize}
 \end{figure}
 
@@ -217,7 +222,7 @@ As explained, we use $4-$fold cross-validation to get the confusion matrix for t
 
 \section{Results}
 
-The performance obtained on the training dataset is shown in Table \ref{tab:performance}.
+The performance of the presented methods obtained on the training dataset is shown in Table \ref{tab:performance}.
 The naive classifier classifies all points of the test dataset as ``like''.
 
 \begin {table}[h]
@@ -227,7 +232,6 @@ The naive classifier classifies all points of the test dataset as ``like''.
   \hline			
   Boosting & 84 \% \\
   Random Forest & 80 \% \\
-  LDA & 77 \% \\
   Naive & 60 \%
 \end{tabular}
 \end{center}
@@ -236,6 +240,14 @@ The naive classifier classifies all points of the test dataset as ``like''.
 \end {table}
 
 \section{Conclusion}
+
+In this mini-project we used two supervised machine learning methods to classify a set of song data into like and disliked songs.
+We implemented, validated, and evaluated two methods; random forests and boosting.
+
+We have implemented and validated the random forest method and found that it is strongly sensitive to the used training data. During the cross-validation procedure we have shown that the validation error can vary within a standard deviation of $5\%$, depending solely on the split of training and validation data. This variance, that is possibly a consequence of the small data size,  also prohibited the fine-tuning the method to specific parameter ranges. However, the method performed reasonably well on the test dataset using the default parameter settings.
+
+We showed that boosting classification tree method performs very well after simple tuning. It was seen that there is no visible dependence between the prediction error and some of the fit parameters. It might be that our data set was simply not large enough to be sensitive to variations of some of the parameters.
+
 
 \section{Contributions}
 
@@ -258,4 +270,13 @@ with Applications in R}, Springer, New York.
 
 [4] Svetnik, V., Liaw, A., Tong, C. \ \& Wang, T., \ (2014) {\it Application of Breiman’s Random Forest to Modeling  Structure-Activity  Relationships  of  Pharmaceutical  Molecules}
 
+\appendix
+
+\section{Code: random forest}
+
+\lstinputlisting[language=R]{code/miniproject_rf.R}
+\lstinputlisting[language=R]{code/colVars.R}
+
+\section{Code: boosting}
+\lstinputlisting[language=R, breaklines=true]{code/boosting.R}
 \end{document}
