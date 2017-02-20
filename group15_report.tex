@@ -67,11 +67,35 @@ We train and validate the random forest and boosting classifiers and test their 
 In this miniproject we are going to consider a classification problem in statistical machine learning.
 The goal is to use different 
 
+\begin{figure}[htp!]
+  \centering
+  \includegraphics[height=0.5\textwidth] {figs/song_pairs.png}
+  \caption{The trainig data set consists of 400 songs that are classified in 2 categories, ``liked'' (red dors) and ``disliked'' (green dots), based on 13 features.}
+  \label{fig:figure2}
+\end{figure}
+
 \section{Used methods}
 
 \subsection{Random Forest}
 
 \subsection{Boosting}
+
+Boosting is one more technique that can be used for improving the predictions resulting from a decision tree. Originally it was designed for improving classification methods, but soon it was realized that it can be applied to many statistical learning methods, both for classification and regression problems. It is considered to be one of the most successful machine learning ideas.
+
+Weak models, those models that perform only slightly better compared to random guessing, are built sequentially. In this series of week models, each one tries to correct the mistakes made by the previous one. Eventually, they are all combined into final, much stronger, model. 
+
+Classification problem discussed in this report is a two-class problem. For building boosting decision tree binary classifier $G(x)$, ``AdaBoost'' algorithm, which is one of the oldest and the most popular boosting algorithm, will be used. The output of this classifier will tell us if the classifier predicts that Andreas likes the specific song, or that he does not like it, for each song in data set. The classification tree is sequentially applied to repeatedly modified versions of data, producing a sequence of week classifiers $G_m(x)$, $m=1,2,...,M$. The error rate on the training sample is:
+
+\begin{equation} \label{boost_error_rate}
+\bar{err}=\frac{1}{N}\sum_{i=1}^{N}I(y_i\neq G(x_i)).
+\end{equation}
+
+These week classifiers, with output coded as $\left\{-1,1\right\}$, are combined through a weighted
+majority vote to produce the final prediction:
+
+\begin{equation} \label{boost_final_pred}
+G(x)=sign(\sum_{m=1}^{M}\alpha_m G_m(x)).
+\end{equation}
 
 \section{Implementation and Validation}
 
@@ -79,11 +103,59 @@ The goal is to use different
 
 \subsection{Boosting}
 
+For the classification problem discussed in this report we also applied boosting classification tree method. AdaBoost is available in R as the command {\fontfamily{cmtt}\selectfont boosting} in the {\fontfamily{cmtt}\selectfont adabag} package.
+
+There are several parameters that need to be optimized. The parameter {\fontfamily{cmtt}\selectfont mfinal} represents the number of trees (weak classifiers) that is used to build the final model. Boosting can overfit if the value of this parameter is too large. Default value is $100$. The parameter {\fontfamily{cmtt}\selectfont maxdepth} sets the maximum depth of any node of the final tree. The root node is counted as $0$. If not specified it will be set equal to the number of classes. The {\fontfamily{cmtt}\selectfont minsplit} value defines the minimal number of observations (data points) that each node needs to have in order for a further split to be attempted. The complexity parameter {\fontfamily{cmtt}\selectfont cp} tells us how much the overall performance of a fit has to be improved by a given split in order for it to happen. All these parameters were optimized while constructing the model. Parameters {\fontfamily{cmtt}\selectfont maxdepth}, {\fontfamily{cmtt}\selectfont minsplit} and {\fontfamily{cmtt}\selectfont cp} were implemented through {\fontfamily{cmtt}\selectfont control} option of a {\fontfamily{cmtt}\selectfont boosting} command.
+
+We use $K-$fold cross-validation to get the confusion matrix for the data set. Since number of unlabeled songs is $100$, we will use $4-$fold cross-validation for our $400$ songs data set. This is implemented using {\fontfamily{cmtt}\selectfont boosting.cv} command. The data is split into $4$ subsets. One of these subsets is used to asses the performance of our prediction model, while other subsets are used as training data. The procedure is repeated for all possible combinations.
+
 \section{Evaluation}
 
 \subsection{Random Forest}
 
 \subsection{Boosting}
+
+Initially, data set of $400$ songs was randomly divided into a training data set and a test data set consisting of $300$ and $100$ songs, respectively. 
+
+A boosted classification tree model was build for several different values of complexity parameter. In Figure \ref{fig:complexity_parameter_values} we see how prediction error changes for different values of this parameter. Conclusion is that there is no clear dependence, but still, the minimal improvement of an overall fit performance, for a given split to be done, should not be to low, since this leads to overfitting. For further parameter optimization we keep {\fontfamily{cmtt}\selectfont cp$=0.01$} fixed.
+ 
+ \begin{figure}[h] %b-dole, t-gore, h-here,
+\includegraphics[scale=0.65]{figs/cp_values.png}
+\centering
+\caption{Prediction error for different complexity parameter values.} \label{fig:complexity_parameter_values}
+\end{figure}
+ 
+ We also see that there is no clear dependence between prediction error and {\fontfamily{cmtt}\selectfont maxdepth} parameter value. This is shown in Figure \ref{fig:maxdepth_parameter_values}. We use fixed value {\fontfamily{cmtt}\selectfont maxdepth$=7$}. Next in our list is a {\fontfamily{cmtt}\selectfont minsplit} parameter and the conclusions here are similar. There is no obvious trend.
+ 
+\begin{figure}[h] %b-dole, t-gore, h-here,
+\includegraphics[scale=0.65]{figs/maxdepth_values}
+\centering
+\caption{Prediction error for different {\fontfamily{cmtt}\selectfont maxdepth} parameter values.} \label{fig:maxdepth_parameter_values}
+\end{figure}
+
+Figure \ref{fig:mfinal_parameter_values} shows how ensemble error changes while number of trees in a model grows. It looks like there is no overfitting, but we also see that lower values of parameter {\fontfamily{cmtt}\selectfont mfinal} can be used and good performance will still be achieved. We use {\fontfamily{cmtt}\selectfont mfinal$=50$} trees.
+
+\begin{figure}[h] %b-dole, t-gore, h-here,
+\includegraphics[scale=0.65]{figs/mfinal_500}
+\centering
+\caption{Ensamble error vs number of trees in a model} \label{fig:mfinal_parameter_values}
+\end{figure} 
+
+As explained, we use $4-$fold cross-validation to get the confusion matrix for the data set. Result is given in Table \ref{tab:confussion_matrix}. Prediction error in this case is below $0.20$, so we can conclude that the model is independent of our training$/$test data set definition, since the results are consistent.
+
+\begin {table}[h]
+\caption {$4-$fold confussion matrix. $0-$Andres did not like the song; $1-$Andreas liked the song.} \label{tab:confussion_matrix} 
+\begin{center}
+\begin{tabular}{r|r|r}
+\hline
+  Observed & 0  & 1 \\
+  \hline			
+  Predicted 0 & 107 & 32 \\
+  1 & 46 & 215 \\ 
+  \hline
+\end{tabular}
+\end{center}
+\end {table}
 
 \subsection{Naive Classifier}
 
@@ -97,18 +169,11 @@ So far anonymized.
 
 \small
 
-[1] Alexander, J.A.\ \& Mozer, M.C.\ (1995) Template-based algorithms
-for connectionist rule extraction. In G.\ Tesauro, D.S.\ Touretzky and
-T.K.\ Leen (eds.), {\it Advances in Neural Information Processing
-  Systems 7}, pp.\ 609--616. Cambridge, MA: MIT Press.
+[1] Hastie, T., Tibshirani, R. \ \& Friedman, J., (2008) {\it The Elements of Statistical Learning: Data Mining, Inference, and Prediction}, Springer, New York.
 
-[2] Bower, J.M.\ \& Beeman, D.\ (1995) {\it The Book of GENESIS:
-  Exploring Realistic Neural Models with the GEneral NEural SImulation
-  System.}  New York: TELOS/Springer--Verlag.
+[2] James, G., Witten, D., Hastie, T. \ \& Tibshirani, R., (2013) {\it An Introduction to Statistical Learning
+with Applications in R}, Springer, New York.
 
-[3] Hasselmo, M.E., Schnell, E.\ \& Barkai, E.\ (1995) Dynamics of
-learning and recall at excitatory recurrent synapses and cholinergic
-modulation in rat hippocampal region CA3. {\it Journal of
-  Neuroscience} {\bf 15}(7):5249-5262.
+[3] Alfaro, E., Gamez, M. \ \$ Garcia, N., with contributions from Li, G. \ (2015) {\it Multiclass AdaBoost.M1, SAMME and Bagging Version 4.1}
 
 \end{document}
