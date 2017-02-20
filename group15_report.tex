@@ -118,13 +118,13 @@ majority vote to produce the final prediction:
 G(x)=sign(\sum_{m=1}^{M}\alpha_m G_m(x)).
 \end{equation}
 
-\section{Implementation and Validation}
+\section{Implementation}
 
 \subsection{Random Forest}
 
 For the random forest classification we used the R-package {\fontfamily{cmtt}\selectfont ranfomForest}.
 
-We carried out k-fold cross-validation for feature selection using the {\fontfamily{cmtt}\selectfont rfcv} command, which makes use of the algorithm described by [4]. As the method relies on a random seed which determines how trees are generates, we repeated the cross-validation $N=10$ times and created a mean predictor.
+We carried out k-fold cross-validation for feature selection using the {\fontfamily{cmtt}\selectfont rfcv} command, which makes use of the algorithm described by [4]. 
 
 \subsection{Boosting}
 
@@ -134,9 +134,31 @@ There are several parameters that need to be optimized. The parameter {\fontfami
 
 We use $K-$fold cross-validation to get the confusion matrix for the data set. Since number of unlabeled songs is $100$, we will use $4-$fold cross-validation for our $400$ songs data set. This is implemented using {\fontfamily{cmtt}\selectfont boosting.cv} command. The data is split into $4$ subsets. One of these subsets is used to asses the performance of our prediction model, while other subsets are used as training data. The procedure is repeated for all possible combinations.
 
-\section{Evaluation}
+\section{Validation}
 
 \subsection{Random Forest}
+
+As the method relies on a random seed which determines how trees are generates, we repeated the cross-validation $N=10$ times and created a mean predictor.
+As shown in Figure~\ref{fig:numpredictors}, if more than 5 predictors ar taken the test-error lies within the same interval.
+However, the mean value is lowest for the case where all the predictor values are consideres.
+
+\begin{figure}[htp!]
+  \centering
+  \includegraphics[height=0.5\textwidth] {figs/numpredictors.png}
+  \caption{The trainig data set consists of 400 songs that are classified in 2 categories, ``liked'' (red dors) and ``disliked'' (green dots), based on 13 features.}
+  \label{fig:numpredictors}
+\end{figure}
+
+Likewise, we evaluated the impact of the tree size on the test error, which is depicted in Figure~\ref{fig:treesize}.
+Here we varied the test and the training data with a ratio of $0.75$ and resampled $N=40$ times.
+We found that as long as the size of trees is larger than 30, the test erorr lies within the same margin.
+
+\begin{figure}[htp!]
+  \centering
+  \includegraphics[height=0.5\textwidth] {figs/treesize.png}
+  \caption{The trainig data set consists of 400 songs that are classified in 2 categories, ``liked'' (red dors) and ``disliked'' (green dots), based on 13 features.}
+  \label{fig:treesize}
+\end{figure}
 
 \subsection{Boosting}
 
