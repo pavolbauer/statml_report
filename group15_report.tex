@@ -122,9 +122,21 @@ G(x)=sign(\sum_{m=1}^{M}\alpha_m G_m(x)).
 
 \subsection{Random Forest}
 
-For the random forest classification we used the R-package {\fontfamily{cmtt}\selectfont ranfomForest}.
+For the random forest classification we used the R-package {\fontfamily{cmtt}\selectfont randomForest}. The call has a set of parameters which are important to consider. Relevant for our application, {\fontfamily{cmtt}\selectfont ntrees} determines the number of trees to grow. This should not be a small number to ensure that every input rows gets predicted at least a few times.
+An other important variables is {\fontfamily{cmtt}\selectfont mtry}, which determines the number of variables that are randomly sampled as candidates at each split. Here we used the default split size $m=\sqrt{p}$, which was discussed previously.
 
-We carried out k-fold cross-validation for feature selection using the {\fontfamily{cmtt}\selectfont rfcv} command, which makes use of the algorithm described by [4]. 
+We carried out k-fold cross-validation for feature selection using the {\fontfamily{cmtt}\selectfont rfcv} command, which makes use of the algorithm described by [4].  The algortihm varies the importance measure for all predictors and potentially tries to remove irrelevant variables. The algortihm has the following structure:
+\begin{enumerate}
+\item Partition the data for 5-fold cross-validation (CV).
+\item On each CV training set, train a model on all variables and use the variable
+importance measure to rank them. Record the CV test set predictions.
+\item Use the variable ranking to remove the least important half of the variables
+and retrain the model, predicting the CV test set. Repeat removal of half of
+the variables until there are about 2 left.
+\item Aggregate results from all 5 CV partitions and compute the error rate (in
+classification) or mean squared error (in regression) at each step of halving.
+\item Replicate steps (1)-(4) 20 times to “smooth out” the variability.
+\end{enumerate}
 
 \subsection{Boosting}
 
@@ -145,7 +157,7 @@ However, the mean value is lowest for the case where all the predictor values ar
 \begin{figure}[htp!]
   \centering
   \includegraphics[height=0.5\textwidth] {figs/numpredictors.png}
-  \caption{The trainig data set consists of 400 songs that are classified in 2 categories, ``liked'' (red dors) and ``disliked'' (green dots), based on 13 features.}
+  \caption{Varying the number of predictors.}
   \label{fig:numpredictors}
 \end{figure}
 
@@ -156,7 +168,7 @@ We found that as long as the size of trees is larger than 30, the test erorr lie
 \begin{figure}[htp!]
   \centering
   \includegraphics[height=0.5\textwidth] {figs/treesize.png}
-  \caption{The trainig data set consists of 400 songs that are classified in 2 categories, ``liked'' (red dors) and ``disliked'' (green dots), based on 13 features.}
+  \caption{Varying the size of the tree.}
   \label{fig:treesize}
 \end{figure}
 
